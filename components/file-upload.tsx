@@ -147,10 +147,10 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+    <Card className="w-full max-w-2xl mx-auto shadow-sm border border-gray-200 bg-white">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-3 text-xl">
-          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full">
+          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
             {getStatusIcon()}
           </div>
           Audio Transcription
@@ -176,7 +176,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isUploading}
-            className="flex-1 h-11 md:h-12 text-sm md:text-base font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex-1 h-11 md:h-12 text-sm md:text-base font-medium"
             variant="outline"
             aria-label={selectedFile ? "Change selected audio file" : "Select audio file for transcription"}
           >
@@ -189,7 +189,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
             <Button
               onClick={handleUpload}
               disabled={disabled || isUploading}
-              className="flex-1 h-11 md:h-12 text-sm md:text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-[1.02] hover:shadow-md focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              className="flex-1 h-11 md:h-12 text-sm md:text-base font-medium bg-blue-600 hover:bg-blue-700"
               aria-label={isUploading ? "Transcribing audio file" : "Start transcription of selected audio file"}
             >
               {isUploading ? (
@@ -210,10 +210,10 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
         {/* Selected file info */}
         {selectedFile && (
-          <div className="p-3 md:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200/50 transition-all duration-300">
+          <div className="p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full">
+                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg">
                   <FileAudio className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -258,7 +258,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
               variant="ghost"
               size="sm"
               disabled={disabled}
-              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               aria-label="Upload another audio file"
             >
               Upload Another File

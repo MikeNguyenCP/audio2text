@@ -28,14 +28,14 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <main className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 md:mb-6" role="img" aria-label="Audio Chat Demo Logo">
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-full mb-4 md:mb-6" role="img" aria-label="Audio Chat Demo Logo">
             <Mic className="h-6 w-6 md:h-8 md:w-8 text-white" />
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3 md:mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3 md:mb-4">
             Audio Chat Demo
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl md:max-w-3xl mx-auto leading-relaxed px-4">
@@ -58,7 +58,7 @@ export default function Home() {
           {/* File Upload Section */}
           <section className="relative" aria-labelledby="upload-heading">
             <div className="flex items-center gap-3 mb-4 md:mb-6 px-4 md:px-0">
-              <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full" role="img" aria-label="Upload icon">
+              <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg" role="img" aria-label="Upload icon">
                 <Mic className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
               </div>
               <div>
@@ -77,7 +77,7 @@ export default function Home() {
           {transcript && (
             <section className="relative" aria-labelledby="chat-heading">
               <div className="flex items-center gap-3 mb-4 md:mb-6 px-4 md:px-0">
-                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-full" role="img" aria-label="Chat icon">
+                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg" role="img" aria-label="Chat icon">
                   <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
                 </div>
                 <div>
@@ -96,34 +96,34 @@ export default function Home() {
           {/* Instructions */}
           {!transcript && (
             <section className="max-w-3xl mx-auto px-4" aria-labelledby="instructions-heading">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6 md:p-8 text-center shadow-lg">
-                <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full mb-4" role="img" aria-label="Instructions icon">
-                  <MessageSquare className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
+              <div className="bg-white rounded-lg border border-gray-200 p-6 md:p-8 text-center shadow-sm">
+                <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg mb-4" role="img" aria-label="Instructions icon">
+                  <MessageSquare className="h-5 w-5 md:h-6 md:w-6 text-gray-600" />
                 </div>
                 <h3 id="instructions-heading" className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6">
                   How it works
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-left" role="list" aria-label="Step-by-step instructions">
                   <div className="flex items-start gap-3" role="listitem">
-                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-blue-100 rounded-full flex items-center justify-center" aria-label="Step 1">
+                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-blue-100 rounded-lg flex items-center justify-center" aria-label="Step 1">
                       <span className="text-xs md:text-sm font-semibold text-blue-600">1</span>
                     </div>
                     <p className="text-sm md:text-base text-gray-700">Upload an audio file (MP3, WAV, or M4A) up to 4MB</p>
                   </div>
                   <div className="flex items-start gap-3" role="listitem">
-                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-full flex items-center justify-center" aria-label="Step 2">
+                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-lg flex items-center justify-center" aria-label="Step 2">
                       <span className="text-xs md:text-sm font-semibold text-green-600">2</span>
                     </div>
                     <p className="text-sm md:text-base text-gray-700">Wait for AI transcription to complete</p>
                   </div>
                   <div className="flex items-start gap-3" role="listitem">
-                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-purple-100 rounded-full flex items-center justify-center" aria-label="Step 3">
+                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-purple-100 rounded-lg flex items-center justify-center" aria-label="Step 3">
                       <span className="text-xs md:text-sm font-semibold text-purple-600">3</span>
                     </div>
                     <p className="text-sm md:text-base text-gray-700">Ask questions about the content using natural language</p>
                   </div>
                   <div className="flex items-start gap-3" role="listitem">
-                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-orange-100 rounded-full flex items-center justify-center" aria-label="Step 4">
+                    <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-orange-100 rounded-lg flex items-center justify-center" aria-label="Step 4">
                       <span className="text-xs md:text-sm font-semibold text-orange-600">4</span>
                     </div>
                     <p className="text-sm md:text-base text-gray-700">Get intelligent responses based on your audio</p>
