@@ -1,0 +1,333 @@
+# Cursor AI Rules for Audio2Text Project
+
+## Project Context
+This is a Next.js 15 application with TypeScript, Tailwind CSS, and shadcn/ui that integrates Azure OpenAI for audio transcription and chat functionality.
+
+## Core Development Principles
+
+### 0. Pre-Development Process
+- **Before attempting any code change, provide understanding on the requirements and proposed solution**
+- Always explain what needs to be built and how you plan to implement it
+- Get user confirmation before proceeding with implementation
+- Break down complex tasks into clear, manageable steps
+
+### 1. Code Quality & Standards
+- **Always use TypeScript** - No implicit `any` types
+- **Follow Next.js 15 App Router conventions** - Use server/client components appropriately
+- **Use functional components** with hooks (no class components)
+- **Implement proper error handling** - Try-catch blocks for async operations
+- **Write self-documenting code** - Clear variable/function names over comments
+- **Keep components small** - Single responsibility principle (max 200 lines)
+- **Use ESLint rules** - Fix all linting errors before committing
+
+### 2. TypeScript Best Practices
+- Define interfaces for all component props
+- Create type definitions in `lib/types.ts` for shared types
+- Use `type` for unions/intersections, `interface` for object shapes
+- Avoid `any` - use `unknown` if type is truly unknown
+- Use proper type guards for runtime type checking
+- Export types alongside components when needed
+
+### 3. Next.js App Router Patterns
+- **Server Components by default** - Only add `"use client"` when necessary:
+  - Interactive components (onClick, useState, useEffect)
+  - Browser APIs (localStorage, window)
+  - React hooks usage
+- **API Routes in `app/api/`** - Follow RESTful conventions
+- **Use Next.js built-in optimizations**:
+  - `next/image` for images
+  - `next/font` for fonts
+  - `next/link` for navigation
+- **Proper data fetching**:
+  - Server Components: async/await directly in component
+  - Client Components: use React hooks or SWR/React Query
+
+### 4. Styling with Tailwind CSS
+- Use Tailwind utility classes (avoid custom CSS when possible)
+- Follow mobile-first responsive design (`sm:`, `md:`, `lg:`)
+- Use shadcn/ui components via `@/components/ui`
+- Utilize CSS variables from `globals.css` for theming
+- Use `cn()` helper from `@/lib/utils` for conditional classes
+
+### 5. Component Structure
+```typescript
+// Example component structure:
+import { ComponentProps } from "react"
+import { cn } from "@/lib/utils"
+
+interface MyComponentProps {
+  title: string
+  optional?: boolean
+}
+
+export function MyComponent({ title, optional = false }: MyComponentProps) {
+  return (
+    <div className={cn("base-classes", optional && "conditional-classes")}>
+      {title}
+    </div>
+  )
+}
+```
+
+### 6. API Route Patterns
+```typescript
+// app/api/example/route.ts
+import { NextRequest, NextResponse } from "next/server"
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+
+    // Validation
+    if (!body.field) {
+      return NextResponse.json(
+        { error: "Field is required" },
+        { status: 400 }
+      )
+    }
+
+    // Process...
+
+    return NextResponse.json({ data: result })
+  } catch (error) {
+    console.error("API Error:", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+```
+
+### 7. Azure OpenAI Integration
+- **Always use server-side API routes** - Never expose API keys to client
+- Store credentials in `.env.local` (never commit)
+- Use `@azure/openai` SDK for all Azure OpenAI calls
+- Implement proper error handling for API failures
+- Add timeout handling for long-running requests
+- Validate file sizes and formats before API calls
+
+### 8. State Management
+- Use React hooks (`useState`, `useReducer`) for component state
+- Avoid prop drilling - use Context API for deep state sharing
+- Keep state close to where it's used
+- Lift state up only when necessary
+
+### 9. Performance Optimization
+- Use React.memo() for expensive components
+- Implement proper loading states
+- Use Suspense boundaries for async components
+- Optimize images with next/image
+- Code split large components with dynamic imports
+- Debounce user input for API calls
+
+### 10. Error Handling
+- **Always wrap async operations in try-catch**
+- Provide user-friendly error messages
+- Log errors server-side for debugging
+- Use Alert component from shadcn/ui for error display
+- Implement error boundaries for component errors
+
+### 11. Security Best Practices
+- **Never expose API keys** - use environment variables
+- Validate all user inputs (client and server)
+- Sanitize file uploads
+- Implement rate limiting for API routes
+- Use HTTPS in production
+- Validate file types and sizes before processing
+
+### 12. Testing Requirements (Before Committing)
+```bash
+# Always run these before committing:
+npm run build          # Ensure TypeScript compiles
+npm run lint          # Fix all linting errors
+```
+
+## Git Commit Workflow
+
+### Pre-Commit Checklist
+- [ ] Run `npm run build` - verify no TypeScript errors
+- [ ] Run `npm run lint` - fix all linting issues
+- [ ] Test functionality manually in dev mode
+- [ ] Check console for errors/warnings
+- [ ] Verify responsive design on different screen sizes
+- [ ] Review code for hardcoded values (use env vars)
+
+### Commit Message Format
+```
+[type] Brief description
+
+Detailed explanation of changes
+- Bullet point 1
+- Bullet point 2
+
+🤖 Generated with Claude Code
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+### Push Workflow
+```bash
+# 1. Build
+npm run build
+
+# 2. Lint
+npm run lint
+
+# 3. Stage changes
+git add .
+
+# 4. Commit with descriptive message
+git commit -m "[type] description"
+
+# 5. Push
+git push
+```
+
+## File Organization
+
+### Directory Structure
+```
+app/
+├── api/              # API routes
+│   ├── transcribe/   # Transcription endpoint
+│   └── chat/         # Chat endpoint
+├── layout.tsx        # Root layout
+├── page.tsx          # Home page
+└── globals.css       # Global styles
+
+components/
+├── ui/               # shadcn/ui components (don't modify)
+├── file-upload.tsx   # Custom components
+└── chat-interface.tsx
+
+lib/
+├── utils.ts          # Utility functions
+└── types.ts          # TypeScript type definitions
+```
+
+### Naming Conventions
+- **Components**: PascalCase (`FileUpload.tsx`)
+- **Utilities**: camelCase (`formatDate.ts`)
+- **Types/Interfaces**: PascalCase (`interface MessageType`)
+- **Constants**: UPPER_SNAKE_CASE (`MAX_FILE_SIZE`)
+- **CSS classes**: kebab-case (via Tailwind)
+
+## Environment Variables
+
+### Required Variables
+```env
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_WHISPER_DEPLOYMENT=
+AZURE_OPENAI_GPT_DEPLOYMENT=
+AZURE_OPENAI_API_VERSION=
+```
+
+### Usage Pattern
+```typescript
+// Access env vars only in server components/API routes
+const apiKey = process.env.AZURE_OPENAI_API_KEY
+if (!apiKey) {
+  throw new Error("Missing AZURE_OPENAI_API_KEY")
+}
+```
+
+## Common Patterns
+
+### Loading States
+```typescript
+const [isLoading, setIsLoading] = useState(false)
+
+// In handler
+setIsLoading(true)
+try {
+  // async operation
+} finally {
+  setIsLoading(false)
+}
+```
+
+### Error States
+```typescript
+const [error, setError] = useState<string | null>(null)
+
+// Display error
+{error && (
+  <Alert variant="destructive">
+    <AlertTitle>Error</AlertTitle>
+    <AlertDescription>{error}</AlertDescription>
+  </Alert>
+)}
+```
+
+### Form Validation
+```typescript
+// Validate before submission
+if (!file) {
+  setError("Please select a file")
+  return
+}
+
+if (file.size > MAX_FILE_SIZE) {
+  setError(`File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB`)
+  return
+}
+
+if (!file.type.includes("audio")) {
+  setError("Please select an audio file")
+  return
+}
+```
+
+## Prohibited Practices
+
+❌ **DO NOT:**
+- Commit `.env.local` or API keys
+- Use `any` type without justification
+- Modify shadcn/ui components directly (extend instead)
+- Skip error handling in API routes
+- Ignore TypeScript errors
+- Push without running build and lint
+- Use inline styles (use Tailwind classes)
+- Create deeply nested components (max 3 levels)
+- Use `console.log` in production (use proper logging)
+- Hardcode configuration values (use env vars)
+
+✅ **DO:**
+- Use TypeScript strictly
+- Handle errors gracefully
+- Validate user inputs
+- Test before committing
+- Write clean, readable code
+- Follow Next.js conventions
+- Use shadcn/ui components
+- Keep components focused and small
+- Document complex logic
+- Use semantic HTML
+
+## Code Review Checklist
+
+Before marking code as complete:
+- [ ] TypeScript types are properly defined
+- [ ] Error handling is implemented
+- [ ] Loading states are shown to users
+- [ ] Responsive design works on mobile
+- [ ] No console errors or warnings
+- [ ] Build completes successfully
+- [ ] Lint passes without errors
+- [ ] Code follows project patterns
+- [ ] No hardcoded values (using env vars)
+- [ ] Security best practices followed
+
+## Resources
+
+- [Next.js 15 Docs](https://nextjs.org/docs)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
+
+---
+
+**Remember:** Quality over speed. Always build and test before pushing!
