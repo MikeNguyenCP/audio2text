@@ -2,13 +2,13 @@
 
 ## Project Setup
 
-- [ ] Create Next.js application with TypeScript and Tailwind CSS
-- [ ] Initialize shadcn/ui with default configuration
-- [ ] Install required shadcn/ui components (button, card, input, scroll-area, alert, toast)
-- [ ] Install additional dependencies (lucide-react)
-- [ ] Create project folder structure (app/api, components, lib)
-- [ ] Set up .env.local file with Azure credentials
-- [ ] Add .env.local to .gitignore
+- [x] Create Next.js application with TypeScript and Tailwind CSS
+- [x] Initialize shadcn/ui with default configuration
+- [x] Install required shadcn/ui components (button, card, input, scroll-area, alert, toast)
+- [x] Install additional dependencies (lucide-react)
+- [x] Create project folder structure (app/api, components, lib)
+- [x] Set up .env.local file with Azure credentials
+- [x] Add .env.local to .gitignore
 
 ## Azure OpenAI Configuration
 
