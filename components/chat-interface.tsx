@@ -25,10 +25,12 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
   const [error, setError] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const shouldAutoScrollRef = useRef(true)
+  const lastMessageCountRef = useRef(0)
 
   // Auto-scroll to bottom when new messages arrive (but not during typing)
   useEffect(() => {
-    if (scrollAreaRef.current && messages.length > 0) {
+    if (scrollAreaRef.current && messages.length > 0 && shouldAutoScrollRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
       if (scrollContainer) {
         // Use requestAnimationFrame to ensure DOM is updated
@@ -37,6 +39,7 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
         })
       }
     }
+    lastMessageCountRef.current = messages.length
   }, [messages.length]) // Only trigger on message count change, not message content
 
   // Focus input when component mounts
@@ -45,6 +48,21 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
       inputRef.current.focus()
     }
   }, [disabled])
+
+  // Handle manual scrolling to disable auto-scroll
+  useEffect(() => {
+    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    if (!scrollContainer) return
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10 // 10px threshold
+      shouldAutoScrollRef.current = isAtBottom
+    }
+
+    scrollContainer.addEventListener('scroll', handleScroll)
+    return () => scrollContainer.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading || disabled) return
@@ -55,6 +73,8 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
       timestamp: new Date()
     }
 
+    // Enable auto-scroll for new messages
+    shouldAutoScrollRef.current = true
     setMessages(prev => [...prev, userMessage])
     setInputMessage("")
     setIsLoading(true)
@@ -87,6 +107,8 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
         timestamp: new Date(data.timestamp)
       }
 
+      // Enable auto-scroll for assistant response
+      shouldAutoScrollRef.current = true
       setMessages(prev => [...prev, assistantMessage])
 
     } catch (err) {
