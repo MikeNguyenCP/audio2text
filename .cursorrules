@@ -153,6 +153,8 @@ npm run lint          # Fix all linting errors
 - [ ] Check console for errors/warnings
 - [ ] Verify responsive design on different screen sizes
 - [ ] Review code for hardcoded values (use env vars)
+- [ ] if the npm run buill take too long, kill the node process and try again
+
 
 ### Commit Message Format
 ```
@@ -320,6 +322,7 @@ Before marking code as complete:
 - [ ] Code follows project patterns
 - [ ] No hardcoded values (using env vars)
 - [ ] Security best practices followed
+- [ ] Update todo with the work done.
 
 ## Resources
 

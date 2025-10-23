@@ -6,7 +6,7 @@ import { TranscriptionResponse, ErrorResponse } from "@/lib/types"
 const client = new OpenAI({
   apiKey: process.env.AZURE_OPENAI_API_KEY!,
   baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}`,
-  defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || "2024-02-15-preview" },
+  defaultQuery: { 'api-version': "2024-02-15-preview" },
   defaultHeaders: {
     'api-key': process.env.AZURE_OPENAI_API_KEY!,
   },
@@ -26,8 +26,21 @@ const ALLOWED_AUDIO_TYPES = [
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse the multipart form data
-    const formData = await request.formData()
+    // Parse the multipart form data with timeout
+    let formData: FormData
+    try {
+      const formDataPromise = request.formData()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 30000)
+      )
+      formData = await Promise.race([formDataPromise, timeoutPromise]) as FormData
+    } catch (formError) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "Invalid form data", details: "Request must contain multipart form data" },
+        { status: 400 }
+      )
+    }
+    
     const file = formData.get('file') as File
 
     // Validate file exists
@@ -64,15 +77,32 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Call Azure OpenAI Whisper API
-    const transcription = await client.audio.transcriptions.create({
-      file: new File([buffer], file.name, { type: file.type }),
-      model: process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT!,
-      response_format: "text",
-      language: "en", // Default to English, can be made configurable
-      temperature: 0.0, // Use deterministic output
-      prompt: "" // Optional: provide context to improve accuracy
-    })
+    // Call Azure OpenAI Whisper API with retry logic
+    let transcription: string = ""
+    let retryCount = 0
+    const maxRetries = 3
+    
+    while (retryCount < maxRetries) {
+      try {
+        const result = await client.audio.transcriptions.create({
+          file: new File([buffer], file.name, { type: file.type }),
+          model: process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT!,
+          response_format: "text",
+          language: "en", // Default to English, can be made configurable
+          temperature: 0.0, // Use deterministic output
+          prompt: "" // Optional: provide context to improve accuracy
+        })
+        transcription = result || ""
+        break
+      } catch (apiError) {
+        retryCount++
+        if (retryCount >= maxRetries) {
+          throw apiError
+        }
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+      }
+    }
 
     // Return successful transcription
     return NextResponse.json<TranscriptionResponse>({

@@ -6,7 +6,7 @@ import { ChatRequest, ChatResponse, ErrorResponse } from "@/lib/types"
 const client = new OpenAI({
   apiKey: process.env.AZURE_OPENAI_API_KEY!,
   baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_GPT_DEPLOYMENT}`,
-  defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || "2024-02-15-preview" },
+  defaultQuery: { 'api-version': "2024-02-15-preview" },
   defaultHeaders: {
     'api-key': process.env.AZURE_OPENAI_API_KEY!,
   },
@@ -14,8 +14,20 @@ const client = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
-    const body: ChatRequest = await request.json()
+    // Parse request body with timeout
+    let body: ChatRequest
+    try {
+      const bodyPromise = request.json()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      )
+      body = await Promise.race([bodyPromise, timeoutPromise]) as ChatRequest
+    } catch (parseError) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "Invalid JSON", details: "Request body must be valid JSON" },
+        { status: 400 }
+      )
+    }
 
     // Validate required fields
     if (!body.message || !body.transcript) {
@@ -64,25 +76,41 @@ Instructions:
 - Provide specific details from the transcript when relevant
 - If asked to summarize, provide a clear and concise summary`
 
-    // Call Azure OpenAI GPT API
-    const completion = await client.chat.completions.create({
-      model: process.env.AZURE_OPENAI_GPT_DEPLOYMENT!,
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: "user",
-          content: body.message
+    // Call Azure OpenAI GPT API with retry logic
+    let completion: any
+    let retryCount = 0
+    const maxRetries = 3
+    
+    while (retryCount < maxRetries) {
+      try {
+        completion = await client.chat.completions.create({
+          model: process.env.AZURE_OPENAI_GPT_DEPLOYMENT!,
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            {
+              role: "user",
+              content: body.message
+            }
+          ],
+          temperature: 0.7, // Balanced creativity and consistency
+          max_tokens: 1000, // Reasonable response length
+          top_p: 0.9,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
+        })
+        break
+      } catch (apiError) {
+        retryCount++
+        if (retryCount >= maxRetries) {
+          throw apiError
         }
-      ],
-      temperature: 0.7, // Balanced creativity and consistency
-      max_tokens: 1000, // Reasonable response length
-      top_p: 0.9,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.0,
-    })
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+      }
+    }
 
     // Extract response content
     const responseContent = completion.choices[0]?.message?.content
