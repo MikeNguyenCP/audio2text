@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -15,9 +15,10 @@ interface ChatInterfaceProps {
   transcript: string
   onError: (error: string) => void
   disabled?: boolean
+  isExpanded?: boolean
 }
 
-export function ChatInterface({ transcript, onError, disabled = false }: ChatInterfaceProps) {
+export function ChatInterface({ transcript, onError, disabled = false, isExpanded = false }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -25,15 +26,18 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive (but not during typing)
   useEffect(() => {
-    if (scrollAreaRef.current) {
+    if (scrollAreaRef.current && messages.length > 0) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
       if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight
+        })
       }
     }
-  }, [messages])
+  }, [messages.length]) // Only trigger on message count change, not message content
 
   // Focus input when component mounts
   useEffect(() => {
@@ -108,7 +112,7 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
     })
   }
 
-  const MessageBubble = ({ message }: { message: Message }) => {
+  const MessageBubble = React.memo(({ message }: { message: Message }) => {
     const isUser = message.role === "user"
     
     return (
@@ -143,7 +147,7 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
                 : "bg-white text-gray-900"
             )} role="article" aria-label={`Message from ${isUser ? 'user' : 'assistant'}`}>
               <CardContent className="p-0">
-                <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
+                <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap break-words">
                   {isUser ? (
                     message.content
                   ) : (
@@ -162,10 +166,15 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
         </div>
       </div>
     )
-  }
+  })
+  
+  MessageBubble.displayName = "MessageBubble"
 
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[500px] md:h-[600px] flex flex-col shadow-sm border border-gray-200 bg-white">
+    <Card className={cn(
+      "w-full mx-auto flex flex-col shadow-sm border border-gray-200 bg-white",
+      isExpanded ? "max-w-5xl h-[600px] md:h-[700px]" : "max-w-4xl h-[500px] md:h-[600px]"
+    )}>
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         {/* Messages area */}
         <div className="flex-1 p-4 md:p-6 min-h-0">
@@ -217,8 +226,8 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
           </div>
         )}
 
-        {/* Input area */}
-        <div className="border-t border-gray-200 p-4 md:p-6 bg-gray-50">
+        {/* Input area - Fixed height to prevent layout shifts */}
+        <div className="border-t border-gray-200 p-4 md:p-6 bg-gray-50 min-h-[80px] md:min-h-[100px] flex flex-col justify-center">
           <div className="flex gap-2 md:gap-3">
             <Input
               ref={inputRef}
@@ -227,7 +236,7 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
               onKeyPress={handleKeyPress}
               placeholder="Ask a question about the audio content..."
               disabled={disabled || isLoading}
-              className="flex-1 h-10 md:h-12 text-sm md:text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+              className="flex-1 h-10 md:h-12 text-sm md:text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-none"
               aria-label="Type your question about the audio content"
               aria-describedby="input-help-text"
             />
@@ -235,7 +244,7 @@ export function ChatInterface({ transcript, onError, disabled = false }: ChatInt
               onClick={handleSendMessage}
               disabled={disabled || isLoading || !inputMessage.trim()}
               size="icon"
-              className="h-10 w-10 md:h-12 md:w-12 bg-blue-600 hover:bg-blue-700"
+              className="h-10 w-10 md:h-12 md:w-12 bg-blue-600 hover:bg-blue-700 flex-shrink-0"
               aria-label={isLoading ? "Sending message" : "Send message"}
             >
               {isLoading ? (

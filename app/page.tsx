@@ -4,17 +4,22 @@ import { useState } from "react"
 import { FileUpload } from "@/components/file-upload"
 import { ChatInterface } from "@/components/chat-interface"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Mic, MessageSquare } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Mic, MessageSquare, ChevronUp, ChevronDown, Upload } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function Home() {
   const [transcript, setTranscript] = useState<string>("")
   const [error, setError] = useState<string | null>(null)
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [isStep1Collapsed, setIsStep1Collapsed] = useState(false)
 
   const handleTranscriptionComplete = (transcriptText: string) => {
     setTranscript(transcriptText)
     setError(null)
     setIsTranscribing(false)
+    // Auto-collapse Step 1 after successful transcription
+    setIsStep1Collapsed(true)
   }
 
   const handleError = (errorMessage: string) => {
@@ -54,23 +59,60 @@ export default function Home() {
         )}
 
         {/* Main content */}
-        <div className="max-w-6xl mx-auto space-y-8 md:space-y-12">
+        <div className={cn(
+          "mx-auto space-y-8 md:space-y-12",
+          transcript && isStep1Collapsed ? "max-w-5xl" : "max-w-6xl"
+        )}>
           {/* File Upload Section */}
           <section className="relative" aria-labelledby="upload-heading">
-            <div className="flex items-center gap-3 mb-4 md:mb-6 px-4 md:px-0">
-              <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg" role="img" aria-label="Upload icon">
-                <Mic className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+            <div className="flex items-center justify-between mb-4 md:mb-6 px-4 md:px-0">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg" role="img" aria-label="Upload icon">
+                  <Mic className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 id="upload-heading" className="text-lg md:text-2xl font-semibold text-gray-900">Step 1: Upload Audio</h2>
+                  <p className="text-xs md:text-sm text-gray-500">
+                    {transcript ? "Audio transcribed successfully" : "Select and transcribe your audio file"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 id="upload-heading" className="text-lg md:text-2xl font-semibold text-gray-900">Step 1: Upload Audio</h2>
-                <p className="text-xs md:text-sm text-gray-500">Select and transcribe your audio file</p>
-              </div>
+              
+              {/* Collapse/Expand Button */}
+              {transcript && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsStep1Collapsed(!isStep1Collapsed)}
+                  className="flex items-center gap-2 text-sm"
+                  aria-label={isStep1Collapsed ? "Expand Step 1" : "Collapse Step 1"}
+                >
+                  {isStep1Collapsed ? (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Show Upload
+                    </>
+                  ) : (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      Hide Upload
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
-            <FileUpload
-              onTranscriptionComplete={handleTranscriptionComplete}
-              onError={handleError}
-              disabled={isTranscribing}
-            />
+            
+            {/* Collapsible File Upload Content */}
+            <div className={cn(
+              "transition-all duration-300 ease-in-out overflow-hidden",
+              isStep1Collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+            )}>
+              <FileUpload
+                onTranscriptionComplete={handleTranscriptionComplete}
+                onError={handleError}
+                disabled={isTranscribing}
+              />
+            </div>
           </section>
 
           {/* Chat Interface Section */}
@@ -85,11 +127,17 @@ export default function Home() {
                   <p className="text-xs md:text-sm text-gray-500">Ask questions and get AI-powered insights</p>
                 </div>
               </div>
-              <ChatInterface
-                transcript={transcript}
-                onError={handleError}
-                disabled={isTranscribing}
-              />
+              <div className={cn(
+                "transition-all duration-300 ease-in-out",
+                isStep1Collapsed ? "scale-105" : "scale-100"
+              )}>
+                <ChatInterface
+                  transcript={transcript}
+                  onError={handleError}
+                  disabled={isTranscribing}
+                  isExpanded={isStep1Collapsed}
+                />
+              </div>
             </section>
           )}
 
