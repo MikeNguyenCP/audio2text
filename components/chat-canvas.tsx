@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import React, { useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -13,13 +13,12 @@ interface ChatCanvasProps {
   messages: Message[]
   isLoading: boolean
   error: string | null
-  onScrollChange?: (isAtBottom: boolean) => void
 }
 
 export const ChatCanvas = React.forwardRef<
   { scrollToBottom: () => void },
   ChatCanvasProps
->(({ messages, isLoading, error, onScrollChange }, ref) => {
+>(({ messages, isLoading, error }, ref) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   // Expose scroll function to parent
@@ -35,21 +34,6 @@ export const ChatCanvas = React.forwardRef<
       }
     }
   }), [])
-
-  // Handle manual scrolling to notify parent
-  useEffect(() => {
-    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
-    if (!scrollContainer || !onScrollChange) return
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10 // 10px threshold
-      onScrollChange(isAtBottom)
-    }
-
-    scrollContainer.addEventListener('scroll', handleScroll)
-    return () => scrollContainer.removeEventListener('scroll', handleScroll)
-  }, [onScrollChange])
 
   const formatTimestamp = (timestamp: Date): string => {
     return timestamp.toLocaleTimeString([], { 

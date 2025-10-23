@@ -20,12 +20,6 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<{ scrollToBottom: () => void }>(null)
-  const shouldAutoScrollRef = useRef(true)
-
-  // Handle scroll changes from canvas
-  const handleScrollChange = (isAtBottom: boolean) => {
-    shouldAutoScrollRef.current = isAtBottom
-  }
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading || disabled) return
@@ -36,19 +30,17 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
       timestamp: new Date()
     }
 
-    // Enable auto-scroll for new messages
-    shouldAutoScrollRef.current = true
     setMessages(prev => [...prev, userMessage])
     setInputMessage("")
     setIsLoading(true)
     setError(null)
 
-    // Scroll after state update
+    // Always scroll to bottom when sending a message
     setTimeout(() => {
-      if (shouldAutoScrollRef.current && canvasRef.current) {
+      if (canvasRef.current) {
         canvasRef.current.scrollToBottom()
       }
-    }, 0)
+    }, 100)
 
     try {
       const requestBody: ChatRequest = {
@@ -77,16 +69,14 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
         timestamp: new Date(data.timestamp)
       }
 
-      // Enable auto-scroll for assistant response
-      shouldAutoScrollRef.current = true
       setMessages(prev => [...prev, assistantMessage])
 
-      // Scroll after state update
+      // Always scroll to bottom when receiving a response
       setTimeout(() => {
-        if (shouldAutoScrollRef.current && canvasRef.current) {
+        if (canvasRef.current) {
           canvasRef.current.scrollToBottom()
         }
-      }, 0)
+      }, 100)
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred"
@@ -110,7 +100,6 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
           messages={messages}
           isLoading={isLoading}
           error={error}
-          onScrollChange={handleScrollChange}
         />
 
         {/* Chat Input - Completely separated from canvas */}
