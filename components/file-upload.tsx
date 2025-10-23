@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Upload, FileAudio, Loader2, CheckCircle, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { FileValidation, TranscriptionResponse } from "@/lib/types"
+import { getCompressionSuggestions, formatFileSize, needsCompression } from "@/lib/audio-compression"
 
 interface FileUploadProps {
   onTranscriptionComplete: (transcript: string) => void
@@ -14,7 +15,7 @@ interface FileUploadProps {
   disabled?: boolean
 }
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
+const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
 const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a"]
 
 export function FileUpload({ onTranscriptionComplete, onError, disabled = false }: FileUploadProps) {
@@ -22,6 +23,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
   const [error, setError] = useState<string | null>(null)
+  const [compressionSuggestions, setCompressionSuggestions] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const validateFile = (file: File): FileValidation => {
@@ -37,9 +39,11 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
+      const suggestions = getCompressionSuggestions(file.size, MAX_FILE_SIZE)
+      setCompressionSuggestions(suggestions)
       return {
         isValid: false,
-        error: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+        error: `File size (${formatFileSize(file.size)}) exceeds the ${formatFileSize(MAX_FILE_SIZE)} limit. Please compress your audio file.`,
         fileName: file.name,
         fileSize: file.size
       }
@@ -58,6 +62,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
     setError(null)
     setUploadStatus("idle")
+    setCompressionSuggestions([])
 
     const validation = validateFile(file)
     if (!validation.isValid) {
@@ -78,7 +83,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
     try {
       const formData = new FormData()
-      formData.append("audio", selectedFile)
+      formData.append("file", selectedFile)
 
       const response = await fetch("/api/transcribe", {
         method: "POST",
@@ -108,18 +113,12 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     setSelectedFile(null)
     setError(null)
     setUploadStatus("idle")
+    setCompressionSuggestions([])
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
 
   const getStatusIcon = () => {
     switch (uploadStatus) {
@@ -157,7 +156,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
           Audio Transcription
         </CardTitle>
         <CardDescription className="text-base text-gray-600">
-          Upload an audio file (MP3, WAV, M4A) up to 25MB to get started
+          Upload an audio file (MP3, WAV, M4A) up to 4MB to get started
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -235,7 +234,19 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
         {error && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="space-y-2">
+              <div>{error}</div>
+              {compressionSuggestions.length > 0 && (
+                <div className="mt-3">
+                  <div className="font-medium text-sm mb-2">Compression suggestions:</div>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {compressionSuggestions.map((suggestion, index) => (
+                      <li key={index}>{suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 

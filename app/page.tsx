@@ -108,7 +108,7 @@ export default function Home() {
                     <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-blue-100 rounded-full flex items-center justify-center" aria-label="Step 1">
                       <span className="text-xs md:text-sm font-semibold text-blue-600">1</span>
                     </div>
-                    <p className="text-sm md:text-base text-gray-700">Upload an audio file (MP3, WAV, or M4A) up to 25MB</p>
+                    <p className="text-sm md:text-base text-gray-700">Upload an audio file (MP3, WAV, or M4A) up to 4MB</p>
                   </div>
                   <div className="flex items-start gap-3" role="listitem">
                     <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-full flex items-center justify-center" aria-label="Step 2">

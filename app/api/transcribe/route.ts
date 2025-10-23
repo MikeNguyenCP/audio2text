@@ -12,8 +12,8 @@ const client = new OpenAI({
   },
 })
 
-// File validation constants
-const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
+// File validation constants - Vercel serverless functions have 4.5MB limit
+const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB (below Vercel's 4.5MB limit)
 const ALLOWED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/mp3',
@@ -21,8 +21,11 @@ const ALLOWED_AUDIO_TYPES = [
   'audio/mp4',
   'audio/m4a',
   'audio/ogg',
-  'audio/webm'
+  'audio/webm',
+  'application/octet-stream' // Common for MP3 files
 ]
+
+const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.webm']
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,12 +54,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file type
-    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
+    // Validate file type (check both MIME type and file extension)
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+    const isValidMimeType = ALLOWED_AUDIO_TYPES.includes(file.type)
+    const isValidExtension = ALLOWED_EXTENSIONS.includes(fileExtension)
+    
+    if (!isValidMimeType && !isValidExtension) {
       return NextResponse.json<ErrorResponse>(
         { 
           error: "Invalid file type", 
-          details: `Supported formats: ${ALLOWED_AUDIO_TYPES.join(', ')}` 
+          details: `File type '${file.type}' and extension '${fileExtension}' not supported. Supported formats: ${ALLOWED_AUDIO_TYPES.join(', ')}` 
         },
         { status: 400 }
       )
@@ -142,6 +149,19 @@ export async function POST(request: NextRequest) {
             details: "Transcription service is currently unavailable" 
           },
           { status: 503 }
+        )
+      }
+
+      // Handle payload size errors
+      if (error.message.includes("Request Entity Too Large") || 
+          error.message.includes("FUNCTION_PAYLOAD_TOO_LARGE") ||
+          error.message.includes("413")) {
+        return NextResponse.json<ErrorResponse>(
+          { 
+            error: "File too large for processing", 
+            details: `Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB. Please compress your audio file or use a shorter recording.` 
+          },
+          { status: 413 }
         )
       }
     }
