@@ -26,21 +26,18 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const shouldAutoScrollRef = useRef(true)
-  const lastMessageCountRef = useRef(0)
 
-  // Auto-scroll to bottom when new messages arrive (but not during typing)
-  useEffect(() => {
-    if (scrollAreaRef.current && messages.length > 0 && shouldAutoScrollRef.current) {
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current && shouldAutoScrollRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
       if (scrollContainer) {
-        // Use requestAnimationFrame to ensure DOM is updated
         requestAnimationFrame(() => {
           scrollContainer.scrollTop = scrollContainer.scrollHeight
         })
       }
     }
-    lastMessageCountRef.current = messages.length
-  }, [messages.length]) // Only trigger on message count change, not message content
+  }
 
   // Focus input when component mounts
   useEffect(() => {
@@ -75,7 +72,12 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
 
     // Enable auto-scroll for new messages
     shouldAutoScrollRef.current = true
-    setMessages(prev => [...prev, userMessage])
+    setMessages(prev => {
+      const newMessages = [...prev, userMessage]
+      // Scroll after state update
+      setTimeout(() => scrollToBottom(), 0)
+      return newMessages
+    })
     setInputMessage("")
     setIsLoading(true)
     setError(null)
@@ -109,7 +111,12 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
 
       // Enable auto-scroll for assistant response
       shouldAutoScrollRef.current = true
-      setMessages(prev => [...prev, assistantMessage])
+      setMessages(prev => {
+        const newMessages = [...prev, assistantMessage]
+        // Scroll after state update
+        setTimeout(() => scrollToBottom(), 0)
+        return newMessages
+      })
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred"
