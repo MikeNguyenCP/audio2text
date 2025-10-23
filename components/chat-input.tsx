@@ -44,7 +44,7 @@ export function ChatInput({
   }
 
   return (
-    <div className="border-t border-gray-200 p-4 md:p-6 bg-gray-50 min-h-[80px] md:min-h-[100px] flex flex-col justify-center">
+    <div className="border-t border-gray-200 p-4 md:p-6 bg-gray-50 h-[80px] md:h-[100px] flex flex-col justify-center flex-shrink-0">
       <div className="flex gap-2 md:gap-3">
         <Input
           ref={inputRef}
@@ -53,7 +53,7 @@ export function ChatInput({
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className="flex-1 h-10 md:h-12 text-sm md:text-base border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-none"
+          className="flex-1 h-10 md:h-12 text-sm md:text-base border-gray-200 focus:border-blue-500 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-none"
           aria-label="Type your question about the audio content"
           aria-describedby="input-help-text"
         />

@@ -101,10 +101,10 @@ export const ChatCanvas = React.forwardRef<
   MessageBubble.displayName = "MessageBubble"
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Messages area */}
-      <div className="flex-1 p-4 md:p-6 min-h-0">
-        <ScrollArea ref={scrollAreaRef} className="h-full">
+      <div className="flex-1 p-4 md:p-6 overflow-hidden">
+        <ScrollArea ref={scrollAreaRef} className="h-full w-full">
           <div className="space-y-4 md:space-y-6 pr-4">
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 py-8 md:py-12">
