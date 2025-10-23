@@ -10,6 +10,7 @@ This is a Next.js 15 application with TypeScript, Tailwind CSS, and shadcn/ui th
 - Always explain what needs to be built and how you plan to implement it
 - Get user confirmation before proceeding with implementation
 - Break down complex tasks into clear, manageable steps
+- Cleanup any running process e.g. node
 
 ### 1. Code Quality & Standards
 - **Always use TypeScript** - No implicit `any` types

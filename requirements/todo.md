@@ -12,11 +12,11 @@
 
 ## Azure OpenAI Configuration
 
-- [ ] Create Azure OpenAI resource in Azure Portal
-- [ ] Deploy Whisper model for audio transcription
-- [ ] Deploy GPT model for chat completion
-- [ ] Obtain and document API credentials (endpoint, API key, deployment names)
-- [ ] Test API credentials with sample requests
+- [x] Create Azure OpenAI resource in Azure Portal
+- [x] Deploy Whisper model for audio transcription
+- [x] Deploy GPT model for chat completion
+- [x] Obtain and document API credentials (endpoint, API key, deployment names)
+- [x] Test API credentials with sample requests
 
 ## Backend API Routes
 
