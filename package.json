@@ -10,7 +10,14 @@
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "pre-commit": "npm run lint && npm run type-check && npm run build",
-    "validate": "npm run lint && npm run type-check"
+    "validate": "npm run lint && npm run type-check",
+    "railway:deploy": "railway up",
+    "railway:logs": "railway logs",
+    "railway:status": "railway status"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "@azure/openai": "^2.0.0",

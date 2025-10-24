@@ -56,7 +56,66 @@ Visit `http://localhost:3000` to test the production build.
 
 ## Deployment Options
 
-### Option 1: Vercel (Recommended)
+### Option 1: Railway (Recommended)
+
+Railway provides excellent Next.js deployment with generous limits and easy configuration.
+
+#### Steps:
+
+1. **Install Railway CLI**:
+   ```bash
+   npm install -g @railway/cli
+   ```
+
+2. **Login to Railway**:
+   ```bash
+   railway login
+   ```
+
+3. **Deploy**:
+   ```bash
+   # Using the deployment script (recommended)
+   ./deploy-railway.sh
+   
+   # Or manually
+   railway up
+   ```
+
+4. **Configure Environment Variables**:
+   - Go to Railway Dashboard → Project → Variables
+   - Add all required environment variables
+   - Redeploy after adding variables
+
+#### Railway Configuration
+
+The project includes `railway.json` for custom configuration:
+
+```json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm run build"
+  },
+  "deploy": {
+    "startCommand": "npm run start",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
+```
+
+#### Railway Advantages
+
+- **Higher Limits**: 50MB file uploads vs 4.5MB on Vercel
+- **Longer Timeouts**: Up to 5 minutes vs 10 seconds on Vercel
+- **Better Pricing**: More generous free tier
+- **Easy Configuration**: Simple environment variable management
+- **Custom Domains**: Free custom domains on Pro plan
+
+### Option 2: Vercel
 
 Vercel provides seamless Next.js deployment with built-in optimizations.
 
