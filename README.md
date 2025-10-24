@@ -114,6 +114,8 @@ audio2text/
 
 This project is currently in active development. See [requirements/todo.md](requirements/todo.md) for implementation progress.
 
+**Latest Update**: Fixed File constructor error in transcribe API - now compatible with Node.js server environment.
+
 ## License
 
 MIT
