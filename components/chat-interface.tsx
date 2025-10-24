@@ -91,7 +91,7 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
   return (
     <Card className={cn(
       "w-full mx-auto flex flex-col shadow-sm border border-gray-200 bg-white",
-      isExpanded ? "max-w-5xl h-[600px] md:h-[700px]" : "max-w-4xl h-[500px] md:h-[600px]"
+      isExpanded ? "max-w-5xl h-[calc(100vh-200px)] md:h-[700px]" : "max-w-4xl h-[calc(100vh-300px)] md:h-[600px]"
     )}>
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         {/* Chat Canvas - Completely separated from input */}
@@ -109,6 +109,7 @@ export function ChatInterface({ transcript, onError, disabled = false, isExpande
           onSend={handleSendMessage}
           disabled={disabled}
           isLoading={isLoading}
+          enableSpeech={true}
         />
       </CardContent>
     </Card>

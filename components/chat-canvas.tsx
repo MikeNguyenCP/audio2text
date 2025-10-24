@@ -51,33 +51,33 @@ export const ChatCanvas = React.forwardRef<
         isUser ? "justify-end" : "justify-start"
       )}>
         <div className={cn(
-          "flex gap-3 md:gap-4 max-w-[90%] md:max-w-[85%]",
+          "flex gap-2 md:gap-4 max-w-[95%] md:max-w-[85%]",
           isUser ? "flex-row-reverse" : "flex-row"
         )}>
           {/* Avatar */}
           <div className={cn(
-            "flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center",
+            "flex-shrink-0 w-7 h-7 md:w-10 md:h-10 rounded-lg flex items-center justify-center",
             isUser 
               ? "bg-blue-600" 
               : "bg-gray-100"
           )}>
             {isUser ? (
-              <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <User className="h-3 w-3 md:h-5 md:w-5 text-white" />
             ) : (
-              <Bot className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+              <Bot className="h-3 w-3 md:h-5 md:w-5 text-gray-600" />
             )}
           </div>
 
           {/* Message content */}
           <div className="space-y-1 md:space-y-2">
             <Card className={cn(
-              "p-3 md:p-4 shadow-sm border border-gray-200",
+              "p-2 md:p-4 shadow-sm border border-gray-200",
               isUser 
                 ? "bg-blue-600 text-white" 
                 : "bg-white text-gray-900"
             )} role="article" aria-label={`Message from ${isUser ? 'user' : 'assistant'}`}>
               <CardContent className="p-0">
-                <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap break-words">
+                <div className="text-xs md:text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere">
                   {isUser ? (
                     message.content
                   ) : (
@@ -103,9 +103,9 @@ export const ChatCanvas = React.forwardRef<
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Messages area */}
-      <div className="flex-1 p-4 md:p-6 overflow-hidden">
+      <div className="flex-1 p-2 md:p-6 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full w-full">
-          <div className="space-y-4 md:space-y-6 pr-4">
+          <div className="space-y-3 md:space-y-6 pr-2 md:pr-4">
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 py-8 md:py-12">
                 <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-lg mb-4 md:mb-6">
@@ -124,15 +124,15 @@ export const ChatCanvas = React.forwardRef<
             
             {/* Loading indicator */}
             {isLoading && (
-              <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <Bot className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+              <div className="flex gap-2 md:gap-3 mb-4">
+                <div className="flex-shrink-0 w-7 h-7 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                  <Bot className="h-3 w-3 md:h-5 md:w-5 text-gray-600" />
                 </div>
-                <Card className="bg-white p-3 md:p-4 border border-gray-200 shadow-sm">
+                <Card className="bg-white p-2 md:p-4 border border-gray-200 shadow-sm">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-2 md:gap-3">
-                      <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin text-gray-600" />
-                      <span className="text-sm md:text-base text-gray-700 font-medium">Thinking...</span>
+                      <Loader2 className="h-3 w-3 md:h-5 md:w-5 animate-spin text-gray-600" />
+                      <span className="text-xs md:text-base text-gray-700 font-medium">Thinking...</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -144,10 +144,10 @@ export const ChatCanvas = React.forwardRef<
 
       {/* Error display */}
       {error && (
-        <div className="px-4 pb-2">
+        <div className="px-2 md:px-4 pb-2">
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-xs md:text-sm">{error}</AlertDescription>
           </Alert>
         </div>
       )}

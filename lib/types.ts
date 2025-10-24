@@ -1,3 +1,17 @@
+// Speech recognition interfaces
+export interface SpeechRecognitionHook {
+  isSupported: boolean
+  isListening: boolean
+  transcript: string
+  interimTranscript: string
+  startListening: () => void
+  stopListening: () => void
+  resetTranscript: () => void
+  error: string | null
+}
+
+export type SpeechButtonState = 'idle' | 'listening' | 'processing' | 'error'
+
 // Message interface for chat functionality
 export interface Message {
   role: 'user' | 'assistant'
