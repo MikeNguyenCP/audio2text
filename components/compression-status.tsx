@@ -37,10 +37,10 @@ export function CompressionStatus({
     if (!progress || status !== 'compressing') return null
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 md:space-y-3">
         <div className="flex items-center gap-2">
-          <Loader2 className="animate-spin" />
-          <span>Optimizing audio for transcription...</span>
+          <Loader2 className="animate-spin w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+          <span className="text-xs md:text-sm">Optimizing audio for transcription...</span>
         </div>
 
         {/* Progress bar */}
@@ -51,7 +51,7 @@ export function CompressionStatus({
           />
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {progress.message} {progress.progress}%
           {progress.estimatedTimeRemaining && (
             <span> - ~{progress.estimatedTimeRemaining}s remaining</span>
@@ -63,7 +63,7 @@ export function CompressionStatus({
 
   const renderFileCards = () => {
     return (
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
         <FileInfoCard 
           file={originalFile} 
           type="original" 
@@ -124,9 +124,9 @@ export function CompressionStatus({
     switch (status) {
       case 'idle':
         return (
-          <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded">
-            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-900">
+          <div className="flex items-start gap-2 p-3 md:p-4 bg-blue-50 border border-blue-200 rounded">
+            <Info className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs md:text-sm text-blue-900">
               Files are automatically optimized for faster upload and best transcription quality
             </p>
           </div>
@@ -134,9 +134,9 @@ export function CompressionStatus({
       
       case 'compressing':
         return (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {renderProgressBar()}
-            <div className="text-sm text-gray-600">
+            <div className="text-xs md:text-sm text-gray-600">
               💡 This will make your upload much faster!
             </div>
           </div>
@@ -144,8 +144,8 @@ export function CompressionStatus({
       
       case 'complete':
         return (
-          <div className="space-y-4">
-            <div className="text-center text-green-700 font-semibold">
+          <div className="space-y-3 md:space-y-4">
+            <div className="text-center text-green-700 font-semibold text-sm md:text-base">
               ✅ Ready to transcribe!
             </div>
             {renderFileCards()}
@@ -154,14 +154,14 @@ export function CompressionStatus({
       
       case 'error':
         return (
-          <div className="space-y-4">
-            <div className="text-center text-red-700 font-semibold">
+          <div className="space-y-3 md:space-y-4">
+            <div className="text-center text-red-700 font-semibold text-sm md:text-base">
               ❌ Compression Failed
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs md:text-sm text-gray-600">
               Error: {error?.message || 'Unknown error'}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs md:text-sm text-gray-600">
               Suggestions:
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Try uploading a different file</li>
@@ -175,11 +175,11 @@ export function CompressionStatus({
       
       case 'skipped':
         return (
-          <div className="space-y-4">
-            <div className="text-center text-yellow-700 font-semibold">
+          <div className="space-y-3 md:space-y-4">
+            <div className="text-center text-yellow-700 font-semibold text-sm md:text-base">
               ⚠️ Compression Skipped
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs md:text-sm text-gray-600">
               Upload may take longer than compressed files. We recommend compression for faster results.
             </div>
             {renderFileCards()}
@@ -193,7 +193,7 @@ export function CompressionStatus({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {renderStatusMessage()}
       {renderSkipOption()}
     </div>

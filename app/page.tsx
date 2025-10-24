@@ -34,16 +34,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8">
         {/* Header */}
-        <header className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-full mb-4 md:mb-6" role="img" aria-label="Audio Chat Demo Logo">
-            <Mic className="h-6 w-6 md:h-8 md:w-8 text-white" />
+        <header className="text-center mb-4 md:mb-8 lg:mb-12">
+          <div className="hidden md:inline-flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 bg-blue-600 rounded-full mb-4 lg:mb-6" role="img" aria-label="Audio Chat Demo Logo">
+            <Mic className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3 md:mb-4">
+          <h1 className="hidden md:block text-3xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-4">
             Audio Chat Demo
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl md:max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="hidden md:block text-lg lg:text-xl text-gray-600 max-w-2xl lg:max-w-3xl mx-auto leading-relaxed px-4">
             Upload an audio file to automatically optimize and transcribe, then chat about its content using AI-powered analysis.
           </p>
         </header>
@@ -60,7 +60,7 @@ export default function Home() {
 
         {/* Main content */}
         <div className={cn(
-          "mx-auto space-y-8 md:space-y-12",
+          "mx-auto space-y-6 md:space-y-12",
           transcript && isStep1Collapsed ? "max-w-5xl" : "max-w-6xl"
         )}>
           {/* File Upload Section */}
@@ -104,8 +104,8 @@ export default function Home() {
             
             {/* Collapsible File Upload Content */}
             <div className={cn(
-              "transition-all duration-300 ease-in-out overflow-hidden",
-              isStep1Collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+              "transition-all duration-300 ease-in-out",
+              isStep1Collapsed ? "max-h-0 opacity-0 overflow-hidden" : "opacity-100"
             )}>
               <FileUpload
                 onTranscriptionComplete={handleTranscriptionComplete}
