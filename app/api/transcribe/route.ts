@@ -22,8 +22,8 @@ function createAzureOpenAIClient() {
   })
 }
 
-// File validation constants - Vercel serverless functions have 4.5MB limit
-const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB (below Vercel's 4.5MB limit)
+// File validation constants - Azure Whisper limit
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB (Azure Whisper limit)
 const ALLOWED_AUDIO_TYPES = [
   'audio/mpeg',
   'audio/mp3',
@@ -82,12 +82,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file size
+    // Validate file size (Azure Whisper limit)
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json<ErrorResponse>(
         { 
           error: "File too large", 
-          details: `Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB` 
+          details: `Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB (Azure Whisper limit)` 
         },
         { status: 400 }
       )
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json<ErrorResponse>(
           { 
             error: "File too large for processing", 
-            details: `Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB. Please compress your audio file or use a shorter recording.` 
+            details: `File too large for Azure Whisper processing. Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB. Please compress your audio file or use a shorter recording.` 
           },
           { status: 413 }
         )

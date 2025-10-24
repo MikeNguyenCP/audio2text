@@ -5,7 +5,7 @@
  */
 
 export interface CompressionOptions {
-  maxSizeBytes: number
+  maxSizeBytes?: number // Optional, defaults to Azure Whisper limit (25MB)
   quality?: number // 0-1, where 1 is highest quality
 }
 
@@ -25,7 +25,7 @@ export async function compressAudioFile(
   file: File, 
   options: CompressionOptions
 ): Promise<CompressionResult> {
-  const { maxSizeBytes, quality = 0.7 } = options
+  const { maxSizeBytes = 25 * 1024 * 1024, quality = 0.7 } = options // Default to 25MB Whisper limit
   
   // If file is already small enough, return as-is
   if (file.size <= maxSizeBytes) {
@@ -41,7 +41,7 @@ export async function compressAudioFile(
   try {
     // For now, we'll provide guidance on manual compression
     // In a production app, you'd implement actual compression here
-    throw new Error(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds limit (${(maxSizeBytes / 1024 / 1024).toFixed(2)}MB). Please compress the audio file manually.`)
+    throw new Error(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Azure Whisper limit (${(maxSizeBytes / 1024 / 1024).toFixed(2)}MB). Please compress the audio file manually.`)
   } catch (error) {
     throw error
   }
@@ -50,7 +50,7 @@ export async function compressAudioFile(
 /**
  * Get compression suggestions for users
  */
-export function getCompressionSuggestions(fileSizeBytes: number, maxSizeBytes: number): string[] {
+export function getCompressionSuggestions(fileSizeBytes: number, maxSizeBytes: number = 25 * 1024 * 1024): string[] {
   const suggestions: string[] = []
   
   if (fileSizeBytes > maxSizeBytes) {
@@ -58,6 +58,10 @@ export function getCompressionSuggestions(fileSizeBytes: number, maxSizeBytes: n
     suggestions.push("Convert to MP3 format with lower bitrate (128kbps or lower)")
     suggestions.push("Split long recordings into smaller segments")
     suggestions.push("Use online audio compressors like Audacity or online tools")
+  } else {
+    suggestions.push("For better performance, consider using MP3 format")
+    suggestions.push("Lower bitrate (128kbps) can reduce file size")
+    suggestions.push("Shorter recordings process faster")
   }
   
   return suggestions
@@ -77,6 +81,6 @@ export function formatFileSize(bytes: number): string {
 /**
  * Check if file needs compression
  */
-export function needsCompression(fileSizeBytes: number, maxSizeBytes: number): boolean {
+export function needsCompression(fileSizeBytes: number, maxSizeBytes: number = 25 * 1024 * 1024): boolean {
   return fileSizeBytes > maxSizeBytes
 }

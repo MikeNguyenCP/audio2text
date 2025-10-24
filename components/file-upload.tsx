@@ -15,7 +15,7 @@ interface FileUploadProps {
   disabled?: boolean
 }
 
-const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB (Vercel serverless limit)
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB (Azure Whisper limit)
 const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a"]
 
 export function FileUpload({ onTranscriptionComplete, onError, disabled = false }: FileUploadProps) {
@@ -37,13 +37,13 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
       }
     }
 
-    // Check file size
+    // Check file size (Azure Whisper limit)
     if (file.size > MAX_FILE_SIZE) {
-      const suggestions = getCompressionSuggestions(file.size, MAX_FILE_SIZE)
+      const suggestions = getCompressionSuggestions(file.size)
       setCompressionSuggestions(suggestions)
       return {
         isValid: false,
-        error: `File size (${formatFileSize(file.size)}) exceeds the ${formatFileSize(MAX_FILE_SIZE)} limit. Please compress your audio file.`,
+        error: `File size (${formatFileSize(file.size)}) exceeds the Azure Whisper limit of ${formatFileSize(MAX_FILE_SIZE)}. Please compress your audio file.`,
         fileName: file.name,
         fileSize: file.size
       }
