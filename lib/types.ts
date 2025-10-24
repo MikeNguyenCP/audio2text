@@ -36,3 +36,37 @@ export interface FileValidation {
   fileSize?: number
   fileName?: string
 }
+
+// Compression-related interfaces
+export interface CompressionSettings {
+  sampleRate: number
+  bitrate: number
+  channels: number
+  format: 'opus' | 'mp3' | 'wav'
+}
+
+export interface CompressionProgress {
+  progress: number // 0-100
+  stage: 'loading' | 'processing' | 'finalizing'
+  message: string
+  estimatedTimeRemaining?: number // seconds
+}
+
+export interface CompressionStats {
+  originalSize: number
+  compressedSize: number
+  originalFormat: string
+  compressedFormat: string
+  originalBitrate?: number
+  compressedBitrate: number
+  compressionRatio: number // Percentage
+  duration?: number // in seconds
+  uploadTimeSaved: number // estimated seconds
+}
+
+export type CompressionStatus = 'idle' | 'compressing' | 'complete' | 'error' | 'skipped'
+
+export interface CompressionResult {
+  compressedFile: File
+  stats: CompressionStats
+}

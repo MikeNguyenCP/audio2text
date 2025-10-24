@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Upload, FileAudio, Loader2, CheckCircle, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { FileValidation, TranscriptionResponse } from "@/lib/types"
-import { getCompressionSuggestions, formatFileSize, needsCompression } from "@/lib/audio-compression"
+import { FileValidation, TranscriptionResponse, CompressionStatus, CompressionProgress, CompressionStats } from "@/lib/types"
+import { compressAudioFile, formatFileSize } from "@/lib/audio-compression"
+import { CompressionStatus as CompressionStatusComponent } from "@/components/compression-status"
 
 interface FileUploadProps {
   onTranscriptionComplete: (transcript: string) => void
@@ -16,14 +17,18 @@ interface FileUploadProps {
 }
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB (Azure Whisper limit)
-const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a"]
+const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a", "audio/ogg", "audio/webm"]
 
 export function FileUpload({ onTranscriptionComplete, onError, disabled = false }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [compressedFile, setCompressedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
   const [error, setError] = useState<string | null>(null)
-  const [compressionSuggestions, setCompressionSuggestions] = useState<string[]>([])
+  const [compressionStatus, setCompressionStatus] = useState<CompressionStatus>("idle")
+  const [compressionProgress, setCompressionProgress] = useState<CompressionProgress | null>(null)
+  const [compressionStats, setCompressionStats] = useState<CompressionStats | null>(null)
+  const [compressionError, setCompressionError] = useState<Error | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const validateFile = (file: File): FileValidation => {
@@ -31,19 +36,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return {
         isValid: false,
-        error: "Please select an audio file (MP3, WAV, or M4A)",
-        fileName: file.name,
-        fileSize: file.size
-      }
-    }
-
-    // Check file size (Azure Whisper limit)
-    if (file.size > MAX_FILE_SIZE) {
-      const suggestions = getCompressionSuggestions(file.size)
-      setCompressionSuggestions(suggestions)
-      return {
-        isValid: false,
-        error: `File size (${formatFileSize(file.size)}) exceeds the Azure Whisper limit of ${formatFileSize(MAX_FILE_SIZE)}. Please compress your audio file.`,
+        error: "Please select an audio file (MP3, WAV, M4A, OGG, WebM)",
         fileName: file.name,
         fileSize: file.size
       }
@@ -56,13 +49,17 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     }
   }
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     setError(null)
     setUploadStatus("idle")
-    setCompressionSuggestions([])
+    setCompressionError(null)
+    setCompressionStatus("idle")
+    setCompressionProgress(null)
+    setCompressionStats(null)
+    setCompressedFile(null)
 
     const validation = validateFile(file)
     if (!validation.isValid) {
@@ -72,10 +69,39 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     }
 
     setSelectedFile(file)
+    
+    // Automatically start compression for all files
+    await startCompression(file)
+  }
+
+  const startCompression = async (file: File) => {
+    setCompressionStatus("compressing")
+    
+    try {
+      const result = await compressAudioFile(file, (progress) => {
+        setCompressionProgress(progress)
+      })
+
+      setCompressedFile(result.compressedFile)
+      setCompressionStats(result.stats)
+      setCompressionStatus("complete")
+      
+      // Validate compressed file is under limit
+      if (result.compressedFile.size > MAX_FILE_SIZE) {
+        throw new Error('File too large even after compression. Please use a shorter recording or split into parts.')
+      }
+
+    } catch (error) {
+      setCompressionStatus("error")
+      setCompressionError(error instanceof Error ? error : new Error('Compression failed'))
+      console.error('Compression failed:', error)
+    }
   }
 
   const handleUpload = async () => {
-    if (!selectedFile) return
+    // Always use compressed file if available, otherwise use original
+    const fileToTranscribe = compressedFile || selectedFile
+    if (!fileToTranscribe) return
 
     setIsUploading(true)
     setUploadStatus("uploading")
@@ -83,7 +109,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
     try {
       const formData = new FormData()
-      formData.append("file", selectedFile)
+      formData.append("file", fileToTranscribe)
 
       const response = await fetch("/api/transcribe", {
         method: "POST",
@@ -111,14 +137,29 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
 
   const handleReset = () => {
     setSelectedFile(null)
+    setCompressedFile(null)
     setError(null)
     setUploadStatus("idle")
-    setCompressionSuggestions([])
+    setCompressionStatus("idle")
+    setCompressionProgress(null)
+    setCompressionStats(null)
+    setCompressionError(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
+  const handleRetryCompression = () => {
+    if (selectedFile) {
+      startCompression(selectedFile)
+    }
+  }
+
+  const handleCancelCompression = () => {
+    setCompressionStatus("idle")
+    setCompressionProgress(null)
+    setCompressionError(null)
+  }
 
   const getStatusIcon = () => {
     switch (uploadStatus) {
@@ -146,6 +187,14 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     }
   }
 
+  const isTranscriptionEnabled = (): boolean => {
+    return (
+      selectedFile !== null &&
+      (compressionStatus === 'complete' || compressionStatus === 'skipped') &&
+      !isUploading
+    )
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-sm border border-gray-200 bg-white">
       <CardHeader className="pb-4">
@@ -156,7 +205,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
           Audio Transcription
         </CardTitle>
         <CardDescription className="text-base text-gray-600">
-          Upload an audio file (MP3, WAV, M4A) up to 4MB to get started
+          Upload an audio file to automatically optimize and transcribe
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -185,7 +234,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
             <span className="sm:hidden">{selectedFile ? "Change" : "Select File"}</span>
           </Button>
 
-          {selectedFile && (
+          {isTranscriptionEnabled() && (
             <Button
               onClick={handleUpload}
               disabled={disabled || isUploading}
@@ -208,45 +257,25 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
           )}
         </div>
 
-        {/* Selected file info */}
+        {/* Compression Status */}
         {selectedFile && (
-          <div className="p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg">
-                  <FileAudio className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="font-semibold text-gray-900 text-sm md:text-base block truncate">{selectedFile.name}</span>
-                  <div className="text-xs md:text-sm text-gray-500">{formatFileSize(selectedFile.size)}</div>
-                </div>
-              </div>
-              <div className="text-left sm:text-right">
-                <div className="text-xs md:text-sm font-medium text-gray-700">
-                  {getStatusText()}
-                </div>
-              </div>
-            </div>
-          </div>
+          <CompressionStatusComponent
+            originalFile={selectedFile}
+            compressedFile={compressedFile}
+            progress={compressionProgress}
+            status={compressionStatus}
+            stats={compressionStats}
+            error={compressionError}
+            onCancel={handleCancelCompression}
+            onRetry={handleRetryCompression}
+          />
         )}
 
         {/* Error display */}
         {error && (
           <Alert variant="destructive">
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription className="space-y-2">
-              <div>{error}</div>
-              {compressionSuggestions.length > 0 && (
-                <div className="mt-3">
-                  <div className="font-medium text-sm mb-2">Compression suggestions:</div>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    {compressionSuggestions.map((suggestion, index) => (
-                      <li key={index}>{suggestion}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 

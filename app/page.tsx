@@ -44,7 +44,7 @@ export default function Home() {
             Audio Chat Demo
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl md:max-w-3xl mx-auto leading-relaxed px-4">
-            Upload an audio file to transcribe and chat about its content using AI-powered analysis.
+            Upload an audio file to automatically optimize and transcribe, then chat about its content using AI-powered analysis.
           </p>
         </header>
 
@@ -73,7 +73,7 @@ export default function Home() {
                 <div>
                   <h2 id="upload-heading" className="text-lg md:text-2xl font-semibold text-gray-900">Step 1: Upload Audio</h2>
                   <p className="text-xs md:text-sm text-gray-500">
-                    {transcript ? "Audio transcribed successfully" : "Select and transcribe your audio file"}
+                    {transcript ? "Audio transcribed successfully" : "Select and automatically optimize your audio file"}
                   </p>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function Home() {
                     <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-blue-100 rounded-lg flex items-center justify-center" aria-label="Step 1">
                       <span className="text-xs md:text-sm font-semibold text-blue-600">1</span>
                     </div>
-                    <p className="text-sm md:text-base text-gray-700">Upload an audio file (MP3, WAV, or M4A) up to 4MB</p>
+                    <p className="text-sm md:text-base text-gray-700">Upload an audio file - automatically optimized for faster upload</p>
                   </div>
                   <div className="flex items-start gap-3" role="listitem">
                     <div className="flex-shrink-0 w-6 h-6 md:w-8 md:h-8 bg-green-100 rounded-lg flex items-center justify-center" aria-label="Step 2">
