@@ -42,7 +42,7 @@ export interface CompressionSettings {
   sampleRate: number
   bitrate: number
   channels: number
-  format: 'opus' | 'mp3' | 'wav'
+  format: 'mp3' | 'wav'
 }
 
 export interface CompressionProgress {

@@ -50,7 +50,7 @@ export function getCompressionSettings(fileSize: number): CompressionSettings {
     sampleRate: 16000,  // Whisper's native sample rate
     bitrate: 48,        // Good quality, reasonable size
     channels: 1,        // Mono sufficient for speech
-    format: 'opus'      // Best compression for speech
+    format: 'mp3'       // MP3 is well-supported by Whisper
   }
 
   // For very large files, use more aggressive compression
@@ -59,7 +59,7 @@ export function getCompressionSettings(fileSize: number): CompressionSettings {
       sampleRate: 16000,
       bitrate: 32,      // More aggressive for very large files
       channels: 1,
-      format: 'opus'
+      format: 'mp3'
     }
   }
 
@@ -266,11 +266,10 @@ function getFileNameWithoutExtension(filename: string): string {
  */
 function getMimeType(format: string): string {
   const mimeTypes: Record<string, string> = {
-    'opus': 'audio/opus',
     'mp3': 'audio/mpeg',
     'wav': 'audio/wav'
   }
-  return mimeTypes[format] || 'audio/opus'
+  return mimeTypes[format] || 'audio/mpeg'
 }
 
 /**

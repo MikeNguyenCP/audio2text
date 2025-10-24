@@ -17,7 +17,7 @@ interface FileUploadProps {
 }
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB (Azure Whisper limit)
-const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a", "audio/ogg", "audio/webm"]
+const ALLOWED_TYPES = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/m4a", "audio/ogg", "audio/webm", "audio/opus"]
 
 export function FileUpload({ onTranscriptionComplete, onError, disabled = false }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -36,7 +36,7 @@ export function FileUpload({ onTranscriptionComplete, onError, disabled = false 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return {
         isValid: false,
-        error: "Please select an audio file (MP3, WAV, M4A, OGG, WebM)",
+        error: "Please select an audio file (MP3, WAV, M4A, OGG, WebM, Opus)",
         fileName: file.name,
         fileSize: file.size
       }

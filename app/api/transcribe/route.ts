@@ -32,10 +32,11 @@ const ALLOWED_AUDIO_TYPES = [
   'audio/m4a',
   'audio/ogg',
   'audio/webm',
+  'audio/opus', // Will be converted to supported format
   'application/octet-stream' // Common for MP3 files
 ]
 
-const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.webm']
+const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.webm', '.opus']
 
 export async function POST(request: NextRequest) {
   try {
