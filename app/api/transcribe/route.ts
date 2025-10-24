@@ -2,15 +2,25 @@ import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 import { TranscriptionResponse, ErrorResponse } from "@/lib/types"
 
-// Initialize Azure OpenAI client
-const client = new OpenAI({
-  apiKey: process.env.AZURE_OPENAI_API_KEY!,
-  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}`,
-  defaultQuery: { 'api-version': "2024-02-15-preview" },
-  defaultHeaders: {
-    'api-key': process.env.AZURE_OPENAI_API_KEY!,
-  },
-})
+// Helper function to create Azure OpenAI client
+function createAzureOpenAIClient() {
+  const apiKey = process.env.AZURE_OPENAI_API_KEY
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT
+  const whisperDeployment = process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT
+
+  if (!apiKey || !endpoint || !whisperDeployment) {
+    throw new Error("Missing required Azure OpenAI environment variables")
+  }
+
+  return new OpenAI({
+    apiKey,
+    baseURL: `${endpoint}/openai/deployments/${whisperDeployment}`,
+    defaultQuery: { 'api-version': "2024-02-15-preview" },
+    defaultHeaders: {
+      'api-key': apiKey,
+    },
+  })
+}
 
 // File validation constants - Vercel serverless functions have 4.5MB limit
 const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB (below Vercel's 4.5MB limit)
@@ -29,6 +39,9 @@ const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.webm']
 
 export async function POST(request: NextRequest) {
   try {
+    // Create Azure OpenAI client
+    const client = createAzureOpenAIClient()
+
     // Parse the multipart form data with timeout
     let formData: FormData
     try {

@@ -2,18 +2,31 @@ import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 import { ChatRequest, ChatResponse, ErrorResponse } from "@/lib/types"
 
-// Initialize Azure OpenAI client
-const client = new OpenAI({
-  apiKey: process.env.AZURE_OPENAI_API_KEY!,
-  baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_GPT_DEPLOYMENT}`,
-  defaultQuery: { 'api-version': "2024-02-15-preview" },
-  defaultHeaders: {
-    'api-key': process.env.AZURE_OPENAI_API_KEY!,
-  },
-})
+// Helper function to create Azure OpenAI client
+function createAzureOpenAIClient() {
+  const apiKey = process.env.AZURE_OPENAI_API_KEY
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT
+  const gptDeployment = process.env.AZURE_OPENAI_GPT_DEPLOYMENT
+
+  if (!apiKey || !endpoint || !gptDeployment) {
+    throw new Error("Missing required Azure OpenAI environment variables")
+  }
+
+  return new OpenAI({
+    apiKey,
+    baseURL: `${endpoint}/openai/deployments/${gptDeployment}`,
+    defaultQuery: { 'api-version': "2024-02-15-preview" },
+    defaultHeaders: {
+      'api-key': apiKey,
+    },
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Create Azure OpenAI client
+    const client = createAzureOpenAIClient()
+
     // Parse request body with timeout
     let body: ChatRequest
     try {
