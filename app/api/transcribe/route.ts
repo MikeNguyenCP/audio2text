@@ -93,49 +93,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Convert file to buffer for Azure OpenAI
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    // Create a file-like object for Azure OpenAI SDK
-    const fileForAPI = {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      lastModified: Date.now(),
-      webkitRelativePath: '',
-      arrayBuffer: () => Promise.resolve(arrayBuffer),
-      stream: () => new ReadableStream({
-        start(controller) {
-          controller.enqueue(buffer)
-          controller.close()
-        }
-      }),
-      bytes: () => Promise.resolve(new Uint8Array(arrayBuffer)),
-      slice: (start?: number, end?: number) => {
-        const slicedBuffer = buffer.slice(start, end)
-        return {
-          name: file.name,
-          type: file.type,
-          size: slicedBuffer.length,
-          lastModified: Date.now(),
-          webkitRelativePath: '',
-          arrayBuffer: () => Promise.resolve(slicedBuffer.buffer),
-          stream: () => new ReadableStream({
-            start(controller) {
-              controller.enqueue(slicedBuffer)
-              controller.close()
-            }
-          }),
-          bytes: () => Promise.resolve(new Uint8Array(slicedBuffer.buffer)),
-          slice: () => fileForAPI,
-          text: () => Promise.resolve(''),
-          [Symbol.toStringTag]: 'File'
-        } as File
-      },
-      text: () => Promise.resolve(''),
-      [Symbol.toStringTag]: 'File'
-    } as unknown as File
+    // Use the original File object directly - Azure OpenAI SDK handles it properly
+    // No need for custom File object implementation that causes experimental feature issues
 
     // Call Azure OpenAI Whisper API with retry logic
     let transcription: string = ""
@@ -145,7 +104,7 @@ export async function POST(request: NextRequest) {
     while (retryCount < maxRetries) {
       try {
         const result = await client.audio.transcriptions.create({
-          file: fileForAPI,
+          file: file, // Use the original File object directly
           model: process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT!,
           response_format: "text",
           language: "en", // Default to English, can be made configurable
